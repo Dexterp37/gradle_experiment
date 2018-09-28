@@ -67,29 +67,23 @@ preBuild.mustRunAfter(createBuildDir)
 preBuild.dependsOn("build_envs")
 
 // Generate the Metrics API
-task generateMetricsSource {
-    description = "Generate the Kotlin code for the Metrics API"
-    doLast {
-        println("Calling python to generate stuff")
-        def script = "$buildDir/bootstrap/Miniconda3/python parsers/parser.py metrics.yaml".execute()
-        script.in.eachLine {line -> println line}
-        script.err.eachLine {line -> println "ERROR: " + line}
-        script.waitFor()
-    }
-}
-
-
 android.applicationVariants.all { variant ->
-    println("Test")//variant.build.dependsOn generateMetricsSource
-}
-/*
-task generateMetricsSources(type: Exec) {
-    description = "Generating sources"
-    doLast {
-        def script = "$buildDir/bootstrap/Miniconda3/python parsers/parser.py metrics.yaml".execute()
-        script.in.eachLine {line -> println line}
-        script.err.eachLine {line -> println "ERROR: " + line}
-        script.waitFor()
-        println ' Generate sourcess!?'
+    def sourceOutputDir =  "$buildDir/telemetry/src/${variant.name}/kotlin"
+    def generateKotlinAPI = task("generateMetricsSourceFor${variant.name.capitalize()}") {
+        description = "Generate the Kotlin code for the Metrics API"
+        doLast {
+            println("Calling python to generate stuff")
+            def script = "$buildDir/bootstrap/Miniconda3/python parsers/parser.py metrics.yaml $sourceOutputDir".execute()
+            script.in.eachLine {line -> println line}
+            script.err.eachLine {line -> println "ERROR: " + line}
+            script.waitFor()
+        }
     }
-}*/
+
+    // This is an Android-Gradle plugin 3+-ism.  Culted from reading the source,
+    // searching for "registerJavaGeneratingTask", and finding
+    // https://github.com/GoogleCloudPlatform/endpoints-framework-gradle-plugin/commit/2f2b91476fb1c6647791e2c6fe531a47615a1e85.
+    // The added directory doesn't appear in the paths listed by the
+    // `sourceSets` task, for reasons unknown.
+    variant.registerJavaGeneratingTask(generateKotlinAPI, new File(sourceOutputDir))
+}
