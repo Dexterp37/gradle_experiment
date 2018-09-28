@@ -17,10 +17,6 @@ buildscript {
         // in the individual module build.gradle files
     }
 }
-/*
-plugins {
-    id "com.jetbrains.python.envs" version "0.0.25"
-}*/
 
 allprojects {
     repositories {
@@ -32,79 +28,3 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
-//apply from: 'app/src/lib/build.gradle'
-
-/*
-envs {
-    bootstrapDirectory = new File(buildDir, 'bootstrap')
-    envsDirectory = new File(buildDir, 'envs')
-
-    // Setup a miniconda environment.
-    conda "Miniconda3", "Miniconda3-latest", "64", ["python-mozparsers==1.*"]
-}
-
-// Setup the python environment before the build starts.
-
-task createBuildDir {
-    description = "Make sure the build dir exists in the pre-build step"
-    doFirst {
-        println "Creating build dir"
-        mkdir project.buildDir
-    }
-}
-
-// Downloading the build envs requires
-init.dependsOn(createBuildDir)
-
-task generateMetricsSources(type: Exec) {
-    description = "Generating sources"
-    doLast {
-        def script = "$buildDir/bootstrap/Miniconda3/python parsers/parser.py metrics.yaml".execute()
-        script.in.eachLine {line -> println line}
-        script.err.eachLine {line -> println "ERROR: " + line}
-        script.waitFor()
-        println ' Generate sourcess!?'
-    }
-}
-/*
-project.afterEvaluate {
-    //build.dependsOn(build_envs)
-    println "$buildDir/Miniconda3/python"
-}
-*/
-/*
-tasks.whenTaskAdded { task ->
-    //if (task.name == 'assembleRelease' || task.name == 'assembleLive') {
-    //    task.dependsOn prelivetask
-    //}
-    println(task.name)
-}
-
-
-
-task myTask {
-    doLast {
-        println 'do it before build'
-    }
-}
-
-configurations
-
-subprojects {
-    afterEvaluate {
-        println "tasks "+ it.tasks.toString()
-        println it.hasProperty('kotlin')
-    }
-}
-afterEvaluate {
-    tasks.println()
-    if (it.hasProperty('kotlin')) {
-        println "after evaluate android!"
-    }
-    //project.tasks.generateMetricsSoruces
-    android.applicationVariants.all { variant ->
-        variant.javaCompiler.dependsOn(generateMetricsSoruces)
-        println("After evaluate blab la")
-    }
-    println "after evaluate"
-}*/

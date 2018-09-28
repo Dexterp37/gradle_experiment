@@ -69,14 +69,23 @@ preBuild.dependsOn("build_envs")
 // Generate the Metrics API
 android.applicationVariants.all { variant ->
     def sourceOutputDir =  "$buildDir/telemetry/src/${variant.name}/kotlin"
-    def generateKotlinAPI = task("generateMetricsSourceFor${variant.name.capitalize()}") {
+    def generateKotlinAPI = task("generateMetricsSourceFor${variant.name.capitalize()}", type: Exec) {
         description = "Generate the Kotlin code for the Metrics API"
+
+        workingDir  rootDir
+        commandLine "$buildDir/bootstrap/Miniconda3/python"
+        args "parsers/parser.py"
+        args "metrics.yaml"
+        args "$sourceOutputDir"
+
+        // Only show the output if something went wrong.
+        ignoreExitValue = true
+        standardOutput = new ByteArrayOutputStream()
+        errorOutput = standardOutput
         doLast {
-            println("Calling python to generate stuff")
-            def script = "$buildDir/bootstrap/Miniconda3/python parsers/parser.py metrics.yaml $sourceOutputDir".execute()
-            script.in.eachLine {line -> println line}
-            script.err.eachLine {line -> println "ERROR: " + line}
-            script.waitFor()
+            if (execResult.exitValue != 0) {
+                throw new GradleException("Process '${commandLine}' finished with non-zero exit value ${execResult.exitValue}:\n\n${standardOutput.toString()}")
+            }
         }
     }
 
